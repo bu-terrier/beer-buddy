@@ -271,6 +271,36 @@ class BeerRecommender:
                             "light beer" → Use Light Beer template
                             "Belgian tripel" → Use Tripel template, set mainstream = 0
                             "dessert stout" → Stout template + high sweet/body, mainstream = 0
+
+                            ## Special Edge Cases
+
+                            ### Explicitly Bad/Poor Quality Requests
+                            When user explicitly asks for "bad", "terrible", "awful", "worst", "horrible", "disgusting", "undrinkable" beer:
+                            - Set ALL features to minimum values (3-10% of max)
+                            - ABV: 0.05-1.0
+                            - All flavor features: 1-10% of their max values
+                            - Astringency: 2-5
+                            - Body: 10-15
+                            - Alcohol: 10-15
+                            - Bitter: 3-10
+                            - Sweet: 10-20
+                            - Sour: 3-10
+                            - Salty: 0-2
+                            - Fruits: 1-10
+                            - Hoppy: 3-10
+                            - Spices: 3-10
+                            - Malty: 15-25
+                            - mainstream: 1
+                            - style: "Low Alcohol Beer" or "Light Beer"
+
+                            Examples:
+                            - "Just a bad beer" → Minimal everything
+                            - "Give me your worst beer" → Lowest possible values
+                            - "I want a terrible beer" → Near-zero features
+                            - "Something awful" → Minimum profile
+
+                            ### Testing/Experimental Requests
+                            If user mentions "test", "experiment", or asks for unusual combinations that would clearly conflict (e.g., "extremely sweet AND extremely bitter AND light body"), recognize this as potentially problematic and generate values that reflect the conflict.
                         """
             
             response = client.chat.completions.create(
