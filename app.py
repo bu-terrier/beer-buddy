@@ -140,7 +140,7 @@ def main():
                                 <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
                                     <span><strong>⭐ Rating:</strong> {beer['rating']:.2f}/5</span>
                                     <span><strong>📊 Reviews:</strong> {beer['num_reviews']}</span>
-                                    <span><strong>📏 Match:</strong> {(1 - min(beer['distance'], 1)) * 100:.0f}%</span>
+                                    <span><strong>📏 Distance:</strong> {beer['distance']:.3f}</span>
                                 </div>
                                 <p style="color: #495057; line-height: 1.6;">
                                     {beer['description'][:300]}{'...' if len(beer['description']) > 300 else ''}

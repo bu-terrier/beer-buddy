@@ -404,7 +404,7 @@ class BeerRecommender:
         
         top_10_beers.sort(key=lambda x: x['quality_score'], reverse=True)
         
-        return top_10_beers[:5]
+        return top_10_beers[:2]  # Changed from [:5] to [:2] to match your friend's output
     
     def get_recommendations(self, user_input):
         llm_output = self.get_beer_features_from_text(user_input)
