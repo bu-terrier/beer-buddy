@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from beer_recommender import BeerRecommender
+import base64
 
 # Page config
 st.set_page_config(
@@ -9,17 +10,44 @@ st.set_page_config(
     layout="centered"
 )
 
-# Clean and simple styling
-st.markdown("""
+def get_base64_image(image_path):
+    """Convert local image to base64 string"""
+    try:
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode()
+    except:
+        return None
+
+# Load background image if it exists
+bg_image = get_base64_image("background.jpg")
+
+# Clean and simple styling with background
+if bg_image:
+    background_css = f"""
+        background-image: 
+            linear-gradient(
+                rgba(255, 255, 255, 0.88),
+                rgba(255, 255, 255, 0.85)
+            ),
+            url("data:image/jpg;base64,{bg_image}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    """
+else:
+    background_css = "background-color: #ffffff;"
+
+st.markdown(f"""
 <style>
-    /* Clean background */
-    .stApp {
-        background-color: #ffffff;
-    }
+    /* Background with image */
+    .stApp {{
+        {background_css}
+    }}
     
-    /* Terminal output style */
-    .terminal-output {
-        background-color: #f8f9fa;
+    /* Terminal output style - slightly more opaque for readability */
+    .terminal-output {{
+        background-color: rgba(248, 249, 250, 0.95);
         border: 1px solid #dee2e6;
         border-radius: 4px;
         padding: 20px;
@@ -29,36 +57,39 @@ st.markdown("""
         white-space: pre-wrap;
         color: #212529;
         margin: 20px 0;
-    }
+    }}
     
     /* Simple button styling */
-    .stButton > button {
+    .stButton > button {{
         background-color: #007bff;
         color: white;
         border: none;
         padding: 8px 16px;
         border-radius: 4px;
         font-weight: 500;
-    }
+    }}
     
-    .stButton > button:hover {
+    .stButton > button:hover {{
         background-color: #0056b3;
-    }
+    }}
     
-    /* Clean input styling */
-    .stTextInput > div > div > input {
+    /* Clean input styling with slight transparency */
+    .stTextInput > div > div > input {{
+        background-color: rgba(255, 255, 255, 0.9);
         border: 1px solid #ced4da;
         border-radius: 4px;
-    }
+    }}
     
-    /* Title styling */
-    h1 {
+    /* Title styling with background for readability */
+    h1 {{
         color: #212529;
         font-weight: 600;
         border-bottom: 2px solid #dee2e6;
-        padding-bottom: 10px;
+        padding: 15px;
         margin-bottom: 20px;
-    }
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 4px;
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -125,16 +156,14 @@ def format_terminal_output(prompt, predicted_rating, recommendations, alt_recomm
     return output
 
 def main():
-    st.title("🍺 Beer Buddy 🍺")
-    st.subheader("Personalized Recommendation System")
-    # st.markdown("Tell us what you\'re craving and we\'ll find your perfect beer")
-
+    st.title("🍺 Beer Buddy - Recommendation System")
+    
     # Load recommender
     with st.spinner("Loading beer database..."):
         recommender = load_recommender()
     
     # Description
-    # st.markdown("Enter your beer preference to get personalized recommendations.")
+    st.markdown("Enter your beer preference to get personalized recommendations.")
     
     # Initialize session state for selected query
     if 'selected_query' not in st.session_state:
@@ -142,7 +171,7 @@ def main():
     
     # Input section - now connected to session state
     user_input = st.text_input(
-        "Tell us what you\'re craving and we\'ll find your perfect beer:",
+        "Beer preference:",
         value=st.session_state.selected_query,  # Use session state value
         placeholder="e.g., I want a hoppy IPA with tropical notes",
         help="Describe the type of beer you're looking for",
@@ -154,13 +183,13 @@ def main():
         st.session_state.selected_query = user_input
     
     # Example queries
-    st.markdown("**Can't make your mind.....Try this out!**")
+    st.markdown("**Example queries:**")
     
     examples = [
-        "Something sour and funky with brett character",
         "I want a light citrusy beer",
         "Give me a hoppy IPA with tropical notes",
         "I want a sessionable pilsner",
+        "Something sour and funky with brett character",
         "Just a Bad beer"
     ]
     
