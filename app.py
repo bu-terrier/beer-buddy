@@ -192,7 +192,7 @@ def main():
         st.session_state.selected_query = user_input
     
     # Example queries
-    st.markdown("**Example queries:**")
+    st.markdown("**Can't make your mind? Try these:**")
     
     examples = [
         "I want a light 🍊 citrusy beer",
