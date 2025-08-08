@@ -125,8 +125,10 @@ def format_terminal_output(prompt, predicted_rating, recommendations, alt_recomm
     return output
 
 def main():
-    st.title("🍺 Beer Buddy - Recommendation System")
-    
+    st.title("🍺 Beer Buddy 🍺")
+    st.subheader("Personalized Recommendation System")
+    st.markdown("Tell us what you\'re craving and we\'ll find your perfect beer")
+
     # Load recommender
     with st.spinner("Loading beer database..."):
         recommender = load_recommender()
