@@ -75,7 +75,7 @@ st.markdown(f"""
     
     /* Clean input styling with slight transparency */
     .stTextInput > div > div > input {{
-        background-color: rgba(255, 255, 255, 0.9);
+        background-color: rgba(255, 255, 255, 0.7);
         border: 1px solid #ced4da;
         border-radius: 4px;
     }}
