@@ -165,14 +165,14 @@ def format_terminal_output(prompt, predicted_rating, recommendations, alt_recomm
     return output
 
 def main():
-    st.title("🍺 Beer Buddy - Recommendation System")
+    st.title("🍺 Beer Buddy 🍺")
     
     # Load recommender
     with st.spinner("Loading beer database..."):
         recommender = load_recommender()
     
     # Description
-    st.markdown("Enter your beer preference to get personalized recommendations.")
+    # st.markdown("Enter your beer preference to get personalized recommendations.")
     
     # Initialize session state for selected query
     if 'selected_query' not in st.session_state:
@@ -180,7 +180,7 @@ def main():
     
     # Input section - now connected to session state
     user_input = st.text_input(
-        "Beer preference:",
+        "**Tell us what you\'re craving and we\'ll find your perfect beer**",
         value=st.session_state.selected_query,  # Use session state value
         placeholder="e.g., I want a hoppy IPA with tropical notes",
         help="Describe the type of beer you're looking for",
@@ -195,10 +195,10 @@ def main():
     st.markdown("**Example queries:**")
     
     examples = [
-        "I want a light citrusy beer",
-        "Give me a hoppy IPA with tropical notes",
+        "I want a light 🍊 citrusy beer",
+        "Give me a 🌺 hoppy IPA with tropical notes",
         "I want a sessionable pilsner",
-        "Something sour and funky with brett character",
+        "Something 🍋 sour and funky with brett character",
         "Just a Bad beer"
     ]
     
