@@ -163,7 +163,7 @@ def main():
         recommender = load_recommender()
     
     # Description
-    st.markdown("Tell us what you\'re craving and we\'ll find your perfect beer")
+    # st.markdown("")
     
     # Initialize session state for selected query
     if 'selected_query' not in st.session_state:
@@ -171,7 +171,7 @@ def main():
     
     # Input section - now connected to session state
     user_input = st.text_input(
-        "Beer preference:",
+        "Tell us what you\'re craving and we\'ll find your perfect beer:",
         value=st.session_state.selected_query,  # Use session state value
         placeholder="e.g., I want a hoppy IPA with tropical notes",
         help="Describe the type of beer you're looking for",
