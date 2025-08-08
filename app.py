@@ -2,64 +2,88 @@ import streamlit as st
 import pandas as pd
 from beer_recommender import BeerRecommender
 
+# Page config
 st.set_page_config(
-    page_title="🍺 Beer Buddy - Terminal Style",
+    page_title="Beer Buddy",
     page_icon="🍺",
-    layout="wide"
+    layout="centered"
 )
 
-# Simple CSS for terminal-like appearance
+# Clean and simple styling
 st.markdown("""
 <style>
+    /* Clean background */
     .stApp {
-        background-color: #1e1e1e;
+        background-color: #ffffff;
     }
-    .output-box {
-        background-color: #000000;
-        color: #ffffff;
-        font-family: 'Courier New', monospace;
+    
+    /* Terminal output style */
+    .terminal-output {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
         padding: 20px;
-        border-radius: 5px;
-        border: 1px solid #333;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 14px;
+        line-height: 1.6;
         white-space: pre-wrap;
-        line-height: 1.5;
+        color: #212529;
+        margin: 20px 0;
     }
-    h1 {
-        color: #ffd700;
-        text-align: center;
-        font-family: 'Arial', sans-serif;
-    }
-    .stTextInput input {
-        background-color: #2a2a2a;
+    
+    /* Simple button styling */
+    .stButton > button {
+        background-color: #007bff;
         color: white;
-        border: 1px solid #444;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+    
+    .stButton > button:hover {
+        background-color: #0056b3;
+    }
+    
+    /* Clean input styling */
+    .stTextInput > div > div > input {
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+    }
+    
+    /* Title styling */
+    h1 {
+        color: #212529;
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
     }
 </style>
 """, unsafe_allow_html=True)
 
 @st.cache_resource
 def load_recommender():
+    """Load and initialize the beer recommender system"""
     recommender = BeerRecommender()
-    with st.spinner("Loading beer database..."):
-        recommender.load_and_preprocess_data()
-        recommender.train_regression_model()
+    recommender.load_and_preprocess_data()
+    recommender.train_regression_model()
     return recommender
 
-def display_results(predicted_rating, regular_recommendations, alt_recommendations=None):
-    """
-    Display recommendations with warnings for low-rated combinations
-    """
-    output = ""
+def format_terminal_output(prompt, predicted_rating, recommendations, alt_recommendations=None):
+    """Format output exactly like beer_expected.ipynb"""
+    
+    output = f"User Prompt = {prompt}\n"
     
     if alt_recommendations is not None:
-        # Low rating case - show warning and alternatives
+        # Low rating warning
         output += "━" * 60 + "\n"
         output += f"⚠️  Warning: This flavor combination typically rates {predicted_rating:.2f}/5\n"
-        output += "━" * 60 + "\n"
+        output += "━" * 60 + "\n\n"
         
-        output += "\n📍 Here's what matches your exact request:\n"
-        if regular_recommendations:
-            for i, beer in enumerate(regular_recommendations[:2], 1):
+        output += "📍 Here's what matches your exact request:\n"
+        if recommendations:
+            for i, beer in enumerate(recommendations[:2], 1):
                 output += f"{i}. {beer['name']} ({beer['rating']:.2f}★ - {int(beer['num_reviews'])} reviews)\n"
                 output += f"   Distance: {beer['distance']:.3f}\n"
         else:
@@ -72,129 +96,115 @@ def display_results(predicted_rating, regular_recommendations, alt_recommendatio
                 output += f"   Distance: {beer['distance']:.3f}\n"
         else:
             output += "   No high-rated alternatives found with your criteria.\n"
-            
+        
         output += "\n💭 Tip: The flavor combination you requested is uncommon. The alternatives above\n"
         output += "   maintain similar characteristics but with proven appeal to beer enthusiasts.\n"
         
     else:
-        # Good rating case - normal display
+        # Good rating
         output += "━" * 60 + "\n"
         output += f"✅ Great choice! Predicted rating: {predicted_rating:.2f}/5\n"
-        output += "━" * 60 + "\n"
+        output += "━" * 60 + "\n\n"
         
-        output += "\n🍺 Top Recommendations:\n"
-        for i, beer in enumerate(regular_recommendations[:2], 1):
+        output += "🍺 Top Recommendations:\n"
+        for i, beer in enumerate(recommendations[:2], 1):
             output += f"\n{i}. {beer['name']}\n"
             output += f"   Rating: {beer['rating']:.2f}/5 ({int(beer['num_reviews'])} reviews)\n"
             output += f"   Distance: {beer['distance']:.3f}\n"
             
-            # Format description
-            desc = beer['description'] if beer['description'] else ""
-            if len(desc) > 120:
-                desc = desc[:120] + "..."
-            output += f"   Notes: {desc}\n" if desc else "   Notes: ...\n"
+            desc = beer.get('description', '')
+            if desc:
+                desc = desc[:120] + "..." if len(desc) > 120 else desc
+                output += f"   Notes: Notes:{desc}\n"
+            else:
+                output += "   Notes: Notes:...\n"
     
-    output += "\n" + "─" * 60
+    output += "\n" + "─" * 60 + "\n"
+    output += "=" * 133
+    
     return output
 
 def main():
-    st.markdown("# 🍺 Beer Buddy - Recommendation System")
+    st.title("🍺 Beer Buddy - Recommendation System")
     
-    recommender = load_recommender()
+    # Load recommender
+    with st.spinner("Loading beer database..."):
+        recommender = load_recommender()
     
-    # Simple input section
-    st.markdown("---")
+    # Description
+    st.markdown("Enter your beer preference to get personalized recommendations.")
     
-    # Pre-defined examples
+    # Input section
+    user_input = st.text_input(
+        "Beer preference:",
+        placeholder="e.g., I want a hoppy IPA with tropical notes",
+        help="Describe the type of beer you're looking for"
+    )
+    
+    # Example queries
+    st.markdown("**Example queries:**")
+    
     examples = [
         "I want a light citrusy beer",
-        "I want a strong lager which is fruity and not too malty",
-        "I want a strong orangey tart beer",
         "Give me a hoppy IPA with tropical notes",
         "I want a sessionable pilsner",
-        "I need a dessert beer with chocolate and coffee notes",
-        "Something light and refreshing with low alcohol",
-        "I want a Belgian tripel with spicy notes",
-        "Give me a bitter hoppy beer with no sweetness",
-        "I want a sweet malty amber ale",
         "Something sour and funky with brett character",
-        "I want a very sweet and very hoppy beer",
         "Just a Bad beer"
     ]
     
-    col1, col2 = st.columns([3, 1])
+    # Create buttons in columns
+    cols = st.columns(2)
+    for i, example in enumerate(examples):
+        with cols[i % 2]:
+            if st.button(example, key=f"ex_{i}", use_container_width=True):
+                st.session_state.query = example
+                st.rerun()
     
-    with col1:
-        user_input = st.text_input(
-            "Enter your beer preference:",
-            placeholder="e.g., 'I want a hoppy IPA with tropical notes'",
-            key="beer_input"
-        )
+    # Check if we have a query from buttons
+    if 'query' in st.session_state:
+        user_input = st.session_state.query
+        del st.session_state.query
     
-    with col2:
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🔍 Get Recommendations", type="primary", use_container_width=True):
-            if user_input:
-                st.session_state.run_search = True
-                st.session_state.search_query = user_input
-            else:
-                st.warning("Please enter a beer preference!")
+    # Get recommendations button
+    if st.button("🔍 Get Recommendations", type="primary", use_container_width=True):
+        if user_input:
+            with st.spinner("Analyzing your request..."):
+                try:
+                    # Get recommendations
+                    results = recommender.get_recommendations(user_input)
+                    
+                    # Format output
+                    terminal_output = format_terminal_output(
+                        user_input,
+                        results['predicted_rating'],
+                        results['recommendations'],
+                        results.get('alt_recommendations')
+                    )
+                    
+                    # Display in terminal style
+                    st.markdown(
+                        f'<div class="terminal-output">{terminal_output}</div>',
+                        unsafe_allow_html=True
+                    )
+                    
+                except Exception as e:
+                    st.error(f"Error: {str(e)}")
+                    st.info("Please check if the GROQ_API_KEY is set in your .env file")
+        else:
+            st.warning("Please enter a beer preference!")
     
-    # Quick examples
-    st.markdown("**Quick Examples:**")
-    cols = st.columns(4)
-    for idx, example in enumerate(examples):
-        col_idx = idx % 4
-        with cols[col_idx]:
-            if st.button(example[:30] + "..." if len(example) > 30 else example, key=f"ex_{idx}"):
-                st.session_state.run_search = True
-                st.session_state.search_query = example
-    
-    st.markdown("---")
-    
-    # Process and display results
-    if hasattr(st.session_state, 'run_search') and st.session_state.run_search:
-        with st.spinner("Processing your request..."):
-            try:
-                # Get the query
-                query = st.session_state.search_query
-                
-                # Display the prompt
-                prompt_output = f"User Prompt = {query}"
-                
-                # Get recommendations
-                results = recommender.get_recommendations(query)
-                
-                # Get rating and recommendations
-                predicted_rating = results['predicted_rating']
-                recommendations = results['recommendations']
-                alt_recommendations = results.get('alt_recommendations')
-                
-                # Generate the display
-                output = display_results(predicted_rating, recommendations, alt_recommendations)
-                
-                # Display in terminal style
-                st.markdown(
-                    f'<div class="output-box">{prompt_output}\n{output}\n{"=" * 133}</div>',
-                    unsafe_allow_html=True
-                )
-                
-            except Exception as e:
-                st.error(f"Error: {str(e)}")
+    # Info section
+    with st.expander("About this system"):
+        st.markdown("""
+        This recommendation system uses:
+        - **Natural Language Processing** via LLM to understand your request
+        - **Gradient Boosting** to predict beer ratings
+        - **K-Nearest Neighbors** to find similar beers
+        - **Quality Scoring** based on ratings and review counts
         
-        # Reset the search flag
-        st.session_state.run_search = False
-    
-    # Footer
-    st.markdown("---")
-    st.markdown(
-        """
-        <div style="text-align: center; color: #888; font-size: 0.9em;">
-        Powered by ML • 3,197 craft beers • Gradient Boosting + KNN
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        The system analyzes **3,197 craft beers** and will warn you if your requested 
+        combination might not taste good (predicted rating < 3.0/5).
+        """)
 
 if __name__ == "__main__":
     main()
