@@ -26,8 +26,8 @@ if bg_image:
     background_css = f"""
         background-image: 
             linear-gradient(
-                rgba(255, 255, 255, 0.88),
-                rgba(255, 255, 255, 0.85)
+                rgba(255, 255, 255, 0.75),
+                rgba(255, 255, 255, 0.70)
             ),
             url("data:image/jpg;base64,{bg_image}");
         background-size: cover;
@@ -45,9 +45,9 @@ st.markdown(f"""
         {background_css}
     }}
     
-    /* Terminal output style - slightly more opaque for readability */
+    /* Terminal output style - more opaque for better readability */
     .terminal-output {{
-        background-color: rgba(248, 249, 250, 0.95);
+        background-color: rgba(248, 249, 250, 0.98);
         border: 1px solid #dee2e6;
         border-radius: 4px;
         padding: 20px;
@@ -57,6 +57,7 @@ st.markdown(f"""
         white-space: pre-wrap;
         color: #212529;
         margin: 20px 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }}
     
     /* Simple button styling */
@@ -67,15 +68,16 @@ st.markdown(f"""
         padding: 8px 16px;
         border-radius: 4px;
         font-weight: 500;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }}
     
     .stButton > button:hover {{
         background-color: #0056b3;
     }}
     
-    /* Clean input styling with slight transparency */
+    /* Clean input styling with better visibility */
     .stTextInput > div > div > input {{
-        background-color: rgba(255, 255, 255, 0.4);
+        background-color: rgba(255, 255, 255, 0.95);
         border: 1px solid #ced4da;
         border-radius: 4px;
     }}
@@ -87,7 +89,14 @@ st.markdown(f"""
         border-bottom: 2px solid #dee2e6;
         padding: 15px;
         margin-bottom: 20px;
-        background-color: rgba(255, 255, 255, 0.4);
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }}
+    
+    /* Make expander more visible */
+    .streamlit-expanderHeader {{
+        background-color: rgba(255, 255, 255, 0.9);
         border-radius: 4px;
     }}
 </style>
@@ -156,21 +165,22 @@ def format_terminal_output(prompt, predicted_rating, recommendations, alt_recomm
     return output
 
 def main():
-    st.title("🍺 Beer Buddy 🍺")
-
+    st.title("🍺 Beer Buddy - Recommendation System")
+    
     # Load recommender
     with st.spinner("Loading beer database..."):
         recommender = load_recommender()
+    
+    # Description
+    st.markdown("Enter your beer preference to get personalized recommendations.")
     
     # Initialize session state for selected query
     if 'selected_query' not in st.session_state:
         st.session_state.selected_query = ""
     
-    # Description
-    # st.markdown("")
     # Input section - now connected to session state
     user_input = st.text_input(
-        "**Tell us what you're craving and we'll find your perfect beer:**",
+        "Beer preference:",
         value=st.session_state.selected_query,  # Use session state value
         placeholder="e.g., I want a hoppy IPA with tropical notes",
         help="Describe the type of beer you're looking for",
@@ -182,13 +192,13 @@ def main():
         st.session_state.selected_query = user_input
     
     # Example queries
-    st.markdown("**Can't makeup your mind? Try these:**")
+    st.markdown("**Example queries:**")
     
     examples = [
-        "I want a light 🍊 citrusy beer",
-        "Give me a 🌺 hoppy IPA with tropical notes",
+        "I want a light citrusy beer",
+        "Give me a hoppy IPA with tropical notes",
         "I want a sessionable pilsner",
-        "Something 🍋 sour and funky with brett character",
+        "Something sour and funky with brett character",
         "Just a Bad beer"
     ]
     
