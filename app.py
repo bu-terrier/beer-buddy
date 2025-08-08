@@ -59,7 +59,7 @@ st.markdown("""
     
     /* Special yellow buttons - Bartender and Find Beer */
     .stButton > button[kind="secondary"] {
-        background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%) !important;
+        background: linear-gradient(135deg, #f6f6f6 0%, #f6f6f6 100%) !important;
         color: #000000 !important;
         border: 2px solid #ffc700 !important;
         padding: 0.5rem 1rem !important;
@@ -237,11 +237,11 @@ def main():
     if 'user_input_text' not in st.session_state:
         st.session_state.user_input_text = ""
     
-    # Selection card
-    st.markdown('<div class="selection-card">', unsafe_allow_html=True)
+    # # Selection card
+    # st.markdown('<div class="selection-card">', unsafe_allow_html=True)
     
     # Flavor selection section
-    st.markdown('<div class="section-header">🎯 Tap Your Favorite Flavors (select multiple):</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"> Tap Your Favorite Flavors (select multiple):</div>', unsafe_allow_html=True)
     
     # Preferences
     preferences = {
