@@ -255,7 +255,7 @@ def main():
         st.session_state.user_input_text = ""
     
     # Selection card
-    st.markdown('<div class="selection-card">', unsafe_allow_html=True)
+    # st.markdown('<div class="selection-card">', unsafe_allow_html=True)
     
     # Flavor selection section - with golden header
     st.markdown('<div class="section-header">🎯 Tap Your Favorite Flavors (select multiple):</div>', unsafe_allow_html=True)
