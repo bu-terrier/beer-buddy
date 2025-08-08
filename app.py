@@ -134,12 +134,22 @@ def main():
     # Description
     st.markdown("Enter your beer preference to get personalized recommendations.")
     
-    # Input section
+    # Initialize session state for selected query
+    if 'selected_query' not in st.session_state:
+        st.session_state.selected_query = ""
+    
+    # Input section - now connected to session state
     user_input = st.text_input(
         "Beer preference:",
+        value=st.session_state.selected_query,  # Use session state value
         placeholder="e.g., I want a hoppy IPA with tropical notes",
-        help="Describe the type of beer you're looking for"
+        help="Describe the type of beer you're looking for",
+        key="beer_input"
     )
+    
+    # Update session state when user types
+    if user_input != st.session_state.selected_query:
+        st.session_state.selected_query = user_input
     
     # Example queries
     st.markdown("**Example queries:**")
@@ -157,13 +167,8 @@ def main():
     for i, example in enumerate(examples):
         with cols[i % 2]:
             if st.button(example, key=f"ex_{i}", use_container_width=True):
-                st.session_state.query = example
+                st.session_state.selected_query = example  # Update session state
                 st.rerun()
-    
-    # Check if we have a query from buttons
-    if 'query' in st.session_state:
-        user_input = st.session_state.query
-        del st.session_state.query
     
     # Get recommendations button
     if st.button("🔍 Get Recommendations", type="primary", use_container_width=True):
