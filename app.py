@@ -47,16 +47,6 @@ st.markdown("""
         text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
     
-    /* Card containers - more compact */
-    .selection-card {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 20px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-        backdrop-filter: blur(10px);
-    }
-    
     /* Bartender's choice button - smaller */
     .bartender-button {
         background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
@@ -254,11 +244,8 @@ def main():
     if 'user_input_text' not in st.session_state:
         st.session_state.user_input_text = ""
     
-    # Selection card
-    # st.markdown('<div class="selection-card">', unsafe_allow_html=True)
-    
     # Flavor selection section - with golden header
-    st.markdown('<div class="section-header">🎯 Tap Your Favorite Flavors (select multiple):</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"> Tap Your Favorite Flavors (select multiple):</div>', unsafe_allow_html=True)
     
     # Create 2 rows of 5 columns for better layout
     preferences = {
