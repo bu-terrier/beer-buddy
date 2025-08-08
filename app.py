@@ -167,10 +167,10 @@ def main():
         st.session_state.selected_query = ""
     
     # Description
-    st.markdown("**Tell us what** you're craving and we'll find your perfect beer:")
+    # st.markdown("")
     # Input section - now connected to session state
     user_input = st.text_input(
-        "",
+        "**Tell us what** you're craving and we'll find your perfect beer:",
         value=st.session_state.selected_query,  # Use session state value
         placeholder="e.g., I want a hoppy IPA with tropical notes",
         help="Describe the type of beer you're looking for",
