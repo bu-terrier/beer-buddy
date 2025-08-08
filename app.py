@@ -50,7 +50,7 @@ st.markdown("""
     /* Bartender's choice button - smaller */
     .bartender-button {
         background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-        color: #1e3c72;
+        color: #ffd700;
         border: none;
         border-radius: 12px;
         padding: 0.8rem;
