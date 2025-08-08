@@ -157,14 +157,13 @@ def format_terminal_output(prompt, predicted_rating, recommendations, alt_recomm
 
 def main():
     st.title("🍺 Beer Buddy 🍺")
-    st.markdown("Tell us what you\'re craving and we\'ll find your perfect beer")
 
     # Load recommender
     with st.spinner("Loading beer database..."):
         recommender = load_recommender()
     
     # Description
-    st.markdown("Enter your beer preference to get personalized recommendations.")
+    st.markdown("Tell us what you\'re craving and we\'ll find your perfect beer")
     
     # Initialize session state for selected query
     if 'selected_query' not in st.session_state:
