@@ -340,7 +340,7 @@ class BeerRecommender:
         
         return test_point
     
-    def get_beer_recommendations(self, llm_output, alt=False, alt_rating_threshold=3.5):
+    def get_beer_recommendations(self, llm_output, alt=False, alt_rating_threshold=3.0):
         X_recommend = self.df[['Style'] + self.scaling_features + ['mainstream', 'strength']].copy()
         y_recommend = self.df[['Name', 'Description', 'review_overall', 'number_of_reviews']].copy()
         
@@ -404,15 +404,23 @@ class BeerRecommender:
         
         top_10_beers.sort(key=lambda x: x['quality_score'], reverse=True)
         
-        return top_10_beers[:2]  # Changed from [:5] to [:2] to match your friend's output
+        return top_10_beers[:2]
     
     def get_recommendations(self, user_input):
         llm_output = self.get_beer_features_from_text(user_input)
         predicted_rating = self.predict_rating(llm_output)
-        recommendations = self.get_beer_recommendations(llm_output)
+        
+        # Get regular recommendations
+        recommendations = self.get_beer_recommendations(llm_output, alt=False)
+        
+        # Get alternative recommendations if rating is low
+        alt_recommendations = None
+        if predicted_rating < 3.0:
+            alt_recommendations = self.get_beer_recommendations(llm_output, alt=True, alt_rating_threshold=3.0)
         
         return {
             'predicted_rating': predicted_rating,
             'recommendations': recommendations,
+            'alt_recommendations': alt_recommendations,
             'user_features': llm_output
         }

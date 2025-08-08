@@ -213,6 +213,22 @@ st.markdown("""
     div[data-testid="stHorizontalBlock"] {
         gap: 0.3rem !important;
     }
+    
+    /* Warning and alternative styles */
+    .warning-header {
+        background: #fff3cd;
+        border: 2px solid #ffc107;
+        border-radius: 8px;
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .alt-section {
+        background: #e8f5e9;
+        border-radius: 8px;
+        padding: 0.5rem;
+        margin-top: 0.5rem;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -236,9 +252,6 @@ def main():
         st.session_state.selected_prefs = []
     if 'user_input_text' not in st.session_state:
         st.session_state.user_input_text = ""
-    
-    # # Selection card
-    # st.markdown('<div class="selection-card">', unsafe_allow_html=True)
     
     # Flavor selection section
     st.markdown('<div class="section-header"> Tap Your Favorite Flavors (select multiple):</div>', unsafe_allow_html=True)
@@ -338,113 +351,163 @@ def main():
             with st.spinner("🍻 Searching..."):
                 try:
                     results = recommender.get_recommendations(user_input)
+                    rating = results['predicted_rating']
                     
-                    # Results container - compact
-                    st.markdown('<div class="results-container">', unsafe_allow_html=True)
-                    
-                    # Match score - compact
-                    col1, col2, col3 = st.columns([1, 2, 1])
-                    with col2:
-                        rating = results['predicted_rating']
-                        if rating >= 4.0:
-                            emoji, message = "🏆", "PERFECT!"
-                        elif rating >= 3.5:
-                            emoji, message = "⭐", "GREAT!"
-                        elif rating >= 3.0:
-                            emoji, message = "👍", "GOOD!"
-                        else:
-                            emoji, message = "🎯", "UNIQUE!"
-                        
+                    # Different display based on rating
+                    if rating < 3.0:
+                        # Low rating warning display
                         st.markdown(f"""
-                        <div style="text-align: center; margin: 0.3rem 0;">
-                            <span style="color: #1e3c72; font-weight: bold;">{emoji} {message}</span>
-                            <span class="score-badge" style="margin-left: 0.5rem;">Score: {rating:.1f}/5</span>
+                        <div class="warning-header">
+                            <div style="text-align: center;">
+                                <span style="font-size: 1.2rem; color: #856404;">
+                                    ⚠️ <strong>Warning: This flavor combination typically rates {rating:.2f}/5</strong>
+                                </span>
+                            </div>
                         </div>
                         """, unsafe_allow_html=True)
-                    
-                    st.markdown("<hr style='margin: 0.3rem 0;'>", unsafe_allow_html=True)
-                    
-                    # Top 2 recommendations - compact
-                    rec_cols = st.columns(2)
-                    
-                    # Beer images
-                    style_images = {
-                        'ipa': 'https://images.unsplash.com/photo-1618183479302-1e0aa382c36b?w=200&h=200&fit=crop',
-                        'stout': 'https://images.unsplash.com/photo-1566633806327-68e152aaf26d?w=200&h=200&fit=crop',
-                        'porter': 'https://images.unsplash.com/photo-1566633806327-68e152aaf26d?w=200&h=200&fit=crop',
-                        'lager': 'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=200&h=200&fit=crop',
-                        'pilsner': 'https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=200&h=200&fit=crop',
-                        'wheat': 'https://images.unsplash.com/photo-1571613316887-6f8d5cbf7ef7?w=200&h=200&fit=crop',
-                        'ale': 'https://images.unsplash.com/photo-1518176258769-f227c798150e?w=200&h=200&fit=crop',
-                        'sour': 'https://images.unsplash.com/photo-1559818454-1b46997bfe30?w=200&h=200&fit=crop'
-                    }
-                    
-                    for i, (beer, column) in enumerate(zip(results['recommendations'][:2], rec_cols), 1):
-                        with column:
-                            beer_name_lower = beer['name'].lower()
-                            image_url = 'https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=200&h=200&fit=crop'
-                            for style, url in style_images.items():
-                                if style in beer_name_lower or style in beer.get('description', '').lower():
-                                    image_url = url
-                                    break
+                        
+                        # Regular recommendations
+                        st.markdown('<div style="color: #1e3c72; font-weight: bold; margin: 0.5rem 0;">📍 Here\'s what matches your exact request:</div>', unsafe_allow_html=True)
+                        
+                        if results['recommendations']:
+                            rec_cols = st.columns(2)
+                            for i, (beer, column) in enumerate(zip(results['recommendations'][:2], rec_cols), 1):
+                                with column:
+                                    st.markdown(f"""
+                                    <div class="rec-card">
+                                        <div style="text-align: center;">
+                                            <span class="rank-badge">#{i}</span>
+                                        </div>
+                                        <h5 style="color: #1e3c72; text-align: center; margin: 0.3rem 0; font-size: 0.9rem;">
+                                            {beer['name'][:35]}{'...' if len(beer['name']) > 35 else ''}
+                                        </h5>
+                                        <div style="text-align: center; margin: 0.3rem 0;">
+                                            <span style="color: #ffd700; font-size: 0.9rem;">⭐ {beer['rating']:.2f}/5</span>
+                                            <div style="color: #666; font-size: 0.75rem; margin-top: 0.2rem;">
+                                                {beer['num_reviews']:,} reviews
+                                            </div>
+                                            <div style="color: #495057; font-size: 0.7rem; margin-top: 0.2rem;">
+                                                Distance: {beer['distance']:.3f}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    """, unsafe_allow_html=True)
+                        else:
+                            st.info("No exact matches found in our database.")
+                        
+                        # Alternative recommendations
+                        if results.get('alt_recommendations'):
+                            st.markdown('<div style="color: #1e3c72; font-weight: bold; margin: 0.5rem 0;">💡 Suggested Alternatives (similar but better rated):</div>', unsafe_allow_html=True)
+                            
+                            alt_cols = st.columns(2)
+                            for i, (beer, column) in enumerate(zip(results['alt_recommendations'][:2], alt_cols), 1):
+                                with column:
+                                    st.markdown(f"""
+                                    <div class="rec-card" style="background: #e8f5e9;">
+                                        <div style="text-align: center;">
+                                            <span class="rank-badge">🌟 #{i}</span>
+                                        </div>
+                                        <h5 style="color: #1e3c72; text-align: center; margin: 0.3rem 0; font-size: 0.9rem;">
+                                            {beer['name'][:35]}{'...' if len(beer['name']) > 35 else ''}
+                                        </h5>
+                                        <div style="text-align: center; margin: 0.3rem 0;">
+                                            <span style="color: #ffd700; font-size: 0.9rem;">⭐ {beer['rating']:.2f}/5</span>
+                                            <div style="color: #666; font-size: 0.75rem; margin-top: 0.2rem;">
+                                                {beer['num_reviews']:,} reviews
+                                            </div>
+                                            <div style="color: #495057; font-size: 0.7rem; margin-top: 0.2rem;">
+                                                Distance: {beer['distance']:.3f}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    """, unsafe_allow_html=True)
+                        else:
+                            st.info("No high-rated alternatives found with your criteria.")
+                        
+                        st.markdown("""
+                        <div style="background: #f8f9fa; border-radius: 8px; padding: 0.5rem; margin-top: 0.5rem;">
+                            <p style="color: #495057; font-size: 0.85rem; margin: 0;">
+                                💭 <strong>Tip:</strong> The flavor combination you requested is uncommon. The alternatives above
+                                maintain similar characteristics but with proven appeal to beer enthusiasts.
+                            </p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                    else:
+                        # Good rating display (original with distance added)
+                        col1, col2, col3 = st.columns([1, 2, 1])
+                        with col2:
+                            if rating >= 4.0:
+                                emoji, message = "🏆", "PERFECT!"
+                            elif rating >= 3.5:
+                                emoji, message = "⭐", "GREAT!"
+                            else:
+                                emoji, message = "👍", "GOOD!"
                             
                             st.markdown(f"""
-                            <div class="rec-card rec-card-top">
-                                <div style="text-align: center;">
-                                    <span class="rank-badge">🥇 #{i}</span>
-                                </div>
-                                <h5 style="color: #1e3c72; text-align: center; margin: 0.3rem 0; font-size: 0.9rem;">
-                                    {beer['name'][:35]}{'...' if len(beer['name']) > 35 else ''}
-                                </h5>
-                                <img src="{image_url}" class="beer-image">
-                                <div style="text-align: center; margin: 0.3rem 0;">
-                                    <span style="color: #ffd700; font-size: 0.95rem;">⭐ {beer['rating']:.1f}/5</span>
-                                    <div style="color: #666; font-size: 0.75rem; margin-top: 0.2rem;">
-                                        {beer['num_reviews']:,} reviews | {(1 - beer['distance']) * 100:.0f}% match
-                                    </div>
-                                </div>
-                                <p style="color: #495057; font-size: 0.7rem; line-height: 1.3; text-align: center; margin-top: 0.3rem;">
-                                    {beer['description'][:100]}...
-                                </p>
+                            <div style="text-align: center; margin: 0.3rem 0;">
+                                <span style="color: #1e3c72; font-weight: bold;">{emoji} {message}</span>
+                                <span class="score-badge" style="margin-left: 0.5rem;">Predicted rating: {rating:.2f}/5</span>
                             </div>
                             """, unsafe_allow_html=True)
-                    
-                    # Additional recommendations - compact
-                    if len(results['recommendations']) > 2:
-                        st.markdown("<hr style='margin: 0.3rem 0;'>", unsafe_allow_html=True)
-                        st.markdown('<h5 style="color: #1e3c72; text-align: center; margin: 0.3rem 0; font-size: 0.9rem;">🍺 More Options</h5>', unsafe_allow_html=True)
                         
-                        more_cols = st.columns(2)
-                        for i, beer in enumerate(results['recommendations'][2:], 3):
-                            with more_cols[(i-3) % 2]:
+                        st.markdown("<hr style='margin: 0.3rem 0;'>", unsafe_allow_html=True)
+                        
+                        # Top 2 recommendations with distance
+                        st.markdown('<h5 style="color: #1e3c72; text-align: center; margin: 0.3rem 0; font-size: 1rem;">🍺 Top Recommendations:</h5>', unsafe_allow_html=True)
+                        
+                        rec_cols = st.columns(2)
+                        
+                        # Beer images
+                        style_images = {
+                            'ipa': 'https://images.unsplash.com/photo-1618183479302-1e0aa382c36b?w=200&h=200&fit=crop',
+                            'stout': 'https://images.unsplash.com/photo-1566633806327-68e152aaf26d?w=200&h=200&fit=crop',
+                            'porter': 'https://images.unsplash.com/photo-1566633806327-68e152aaf26d?w=200&h=200&fit=crop',
+                            'lager': 'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=200&h=200&fit=crop',
+                            'pilsner': 'https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=200&h=200&fit=crop',
+                            'wheat': 'https://images.unsplash.com/photo-1571613316887-6f8d5cbf7ef7?w=200&h=200&fit=crop',
+                            'ale': 'https://images.unsplash.com/photo-1518176258769-f227c798150e?w=200&h=200&fit=crop',
+                            'sour': 'https://images.unsplash.com/photo-1559818454-1b46997bfe30?w=200&h=200&fit=crop'
+                        }
+                        
+                        for i, (beer, column) in enumerate(zip(results['recommendations'][:2], rec_cols), 1):
+                            with column:
+                                beer_name_lower = beer['name'].lower()
+                                image_url = 'https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=200&h=200&fit=crop'
+                                for style, url in style_images.items():
+                                    if style in beer_name_lower or style in beer.get('description', '').lower():
+                                        image_url = url
+                                        break
+                                
                                 st.markdown(f"""
-                                <div class="rec-card" style="padding: 0.5rem;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span style="background: #e3f2fd; color: #1e3c72; padding: 0.1rem 0.4rem; border-radius: 6px; font-weight: 600; font-size: 0.7rem;">
-                                            #{i}
-                                        </span>
-                                        <span style="color: #ffd700; font-weight: 600; font-size: 0.8rem;">
-                                            ⭐ {beer['rating']:.1f}
-                                        </span>
+                                <div class="rec-card rec-card-top">
+                                    <div style="text-align: center;">
+                                        <span class="rank-badge">🥇 #{i}</span>
                                     </div>
-                                    <h6 style="color: #1e3c72; margin: 0.2rem 0; font-size: 0.85rem;">
-                                        {beer['name'][:40]}{'...' if len(beer['name']) > 40 else ''}
-                                    </h6>
-                                    <p style="color: #495057; font-size: 0.7rem; line-height: 1.2; margin-top: 0.2rem;">
-                                        {beer['description'][:80]}...
+                                    <h5 style="color: #1e3c72; text-align: center; margin: 0.3rem 0; font-size: 0.9rem;">
+                                        {beer['name'][:35]}{'...' if len(beer['name']) > 35 else ''}
+                                    </h5>
+                                    <img src="{image_url}" class="beer-image">
+                                    <div style="text-align: center; margin: 0.3rem 0;">
+                                        <span style="color: #ffd700; font-size: 0.95rem;">⭐ {beer['rating']:.2f}/5</span>
+                                        <div style="color: #666; font-size: 0.75rem; margin-top: 0.2rem;">
+                                            {beer['num_reviews']:,} reviews
+                                        </div>
+                                        <div style="color: #495057; font-size: 0.7rem; margin-top: 0.2rem;">
+                                            Distance: {beer['distance']:.3f}
+                                        </div>
+                                    </div>
+                                    <p style="color: #495057; font-size: 0.7rem; line-height: 1.3; text-align: center; margin-top: 0.3rem;">
+                                        Notes: {beer['description'][:100]}...
                                     </p>
                                 </div>
                                 """, unsafe_allow_html=True)
-                    
-                    st.markdown('</div>', unsafe_allow_html=True)
                     
                 except Exception as e:
                     st.error(f"😞 Error: {str(e)}")
                     st.info("💡 Try a different description.")
         else:
             st.warning("🍺 Please tell us what you're looking for!")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
     
     # Footer - compact
     st.markdown("""
