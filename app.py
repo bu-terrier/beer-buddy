@@ -165,7 +165,13 @@ def format_terminal_output(prompt, predicted_rating, recommendations, alt_recomm
     return output
 
 def main():
-    st.title("🍺 Beer Buddy 🍺")
+    # st.title("🍺 Beer Buddy 🍺")
+    st.markdown(
+    """
+    <h1 style='text-align: center;'>🍺 Beer Buddy 🍺</h1>
+    """,
+    unsafe_allow_html=True
+)
     
     # Load recommender
     with st.spinner("Loading beer database..."):
